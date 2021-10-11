@@ -6,7 +6,7 @@
 /*   By: parobert <parobert@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/24 12:49:14 by parobert          #+#    #+#             */
-/*   Updated: 2021/10/11 09:28:16 by parobert         ###   ########.fr       */
+/*   Updated: 2021/10/10 21:29:52 by parobert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static size_t	ft_add_n_to_line(char *chr_ptr, int *endline, size_t readsize)
 	return (i);
 }
 
-static int	ft_line_allocation(int fd, char **line, char **old, int *endline)
+static void	ft_line_allocation(int fd, char **line, char **old, int *endline)
 {
 	char	*buffer;
 	char	*line_updt;
@@ -58,16 +58,29 @@ static int	ft_line_allocation(int fd, char **line, char **old, int *endline)
 	size_t	n;
 
 	buffer = (char *)ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	while (1)
+	while (buffer != NULL)
 	{
 		i = read(fd, buffer, BUFFER_SIZE);
 		if (i == 0)
-			return (ft_free_pointers(&buffer, old, 1));
+		{
+			free(buffer);
+			buffer = NULL;
+			free(*old);
+			*old = NULL;
+			*endline = 1;
+			return ;
+		}
 		if (i == -1)
-			return (ft_free_pointers(&buffer, old, 2));
+		{
+			free(buffer);
+			buffer = NULL;
+			free(*old);
+			*old = NULL;
+			*endline = 2;
+			return ;
+		}
 		n = ft_add_n_to_line(buffer, endline, i);
 		line_updt = (char *)ft_calloc(ft_strlen(*line) + n + 1, sizeof(char));
-		line_updt[ft_strlen(*line) + n] = '\0';
 		if (line != NULL)
 			ft_strlcpy(line_updt, *line, (ft_strlen(*line) + 1));
 		ft_strlcat(line_updt, buffer, (ft_strlen(*line) + n + 1));
@@ -77,7 +90,9 @@ static int	ft_line_allocation(int fd, char **line, char **old, int *endline)
 		if (*endline == 1)
 		{
 			ft_strlcpy(*old, buffer + n, i - n + 1);
-			return (ft_free_pointers(&buffer, NULL, 1));
+			free(buffer);
+			buffer = NULL;
+			return ;
 		}
 	}
 }
@@ -93,7 +108,7 @@ static void	ft_old_line_allocation(char **line, char **old, int *endline)
 	if (*line == NULL)
 	{
 		*endline = 2;
-		return ;
+		return;
 	}
 	(*line)[n] = '\0';
 	ft_strlcpy(*line, *old, n + 1);
@@ -106,20 +121,20 @@ char	*get_next_line(int fd)
 	static char	*old;
 	int			endline;
 
-	if (fd <= 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	line = NULL;
 	endline = 0;
 	if (old == NULL)
 		old = (char *)ft_calloc(BUFFER_SIZE, sizeof(char));
-	if (read(fd, old, 0) == -1)
-		return (NULL);
+//	if (read(fd, old, 0) == -1)
+//		return (NULL);
 	ft_old_line_allocation(&line, &old, &endline);
 	if (endline == 1)
 		return (line);
 	if (endline == 2)
 		return (NULL);
-	endline = ft_line_allocation(fd, &line, &old, &endline);
+	ft_line_allocation(fd, &line, &old, &endline);
 	if (endline == 2)
 		return (NULL);
 	return (line);
