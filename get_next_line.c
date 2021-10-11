@@ -65,6 +65,8 @@ static void	ft_line_allocation(int fd, char **line, char **old, int *endline)
 		{
 			free(buffer);
 			buffer = NULL;
+			free(*old);
+			*old = NULL;
 			*endline = 1;
 			return ;
 		}
@@ -72,6 +74,8 @@ static void	ft_line_allocation(int fd, char **line, char **old, int *endline)
 		{
 			free(buffer);
 			buffer = NULL;
+			free(*old);
+			*old = NULL;
 			*endline = 2;
 			return ;
 		}
