@@ -6,33 +6,29 @@
 /*   By: parobert <parobert@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/24 12:49:08 by parobert          #+#    #+#             */
-/*   Updated: 2021/10/08 15:46:19 by parobert         ###   ########.fr       */
+/*   Updated: 2021/10/11 09:26:04 by parobert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	ft_bzero(void *b, size_t n)
-{
-	size_t	i;
-	char	*b_ptr;
-
-	b_ptr = (char *)b;
-	i = 0;
-	while (i < n)
-	{
-		*(b_ptr + i) = 0;
-		i++;
-	}
-}
-
 void	*ft_calloc(size_t num, size_t size)
 {
 	void	*ptr;
+	size_t	i;
+	size_t	len;
 
 	ptr = malloc(num * size);
+	i = 0;
+	len = num * size;
 	if (ptr != NULL)
-		ft_bzero(ptr, num * size);
+	{
+		while (i < len)
+		{
+			*(char *)(ptr + i) = 0;
+			i++;
+		}
+	}
 	return (ptr);
 }
 
@@ -40,9 +36,9 @@ size_t	ft_strlen(const char *s)
 {
 	size_t	i;
 
+	i = 0;
 	if (s == NULL)
 		return (0);
-	i = 0;
 	while (*(s + i) != '\0')
 	{
 		i++;
@@ -86,4 +82,19 @@ size_t	ft_strlcat(char *dest, const char *source, size_t n)
 	if (n > i)
 		ft_strlcpy((dest + i), source, (n - i));
 	return (i + ft_strlen(source));
+}
+
+int	ft_free_pointers(void **ptr1, void **ptr2, int return_value)
+{
+	if (*ptr1 != NULL)
+	{
+		free(*ptr1);
+		*ptr1 = NULL;
+	}
+	if (*ptr2 != NULL)
+	{
+		free(*ptr2);
+		*ptr2 = NULL;
+	}
+	return (return_value);
 }
